@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Admin Bookings — LocalFind{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span>🛡️ LocalFind Admin</span>
+      <span class="role">Control Panel</span>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="/admin/dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+      <li><a href="/admin/bookings" class="active"><i class="fas fa-calendar-alt"></i> Bookings</a></li>
+      <li><a href="/admin/users"><i class="fas fa-users"></i> Users</a></li>
+      <li><a href="/services"><i class="fas fa-tools"></i> View Services</a></li>
+      <li><a href="/admin/logout" style="color:#f87171;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-page-header">
+      <h1>All Bookings</h1>
+      <p>Manage and track service bookings across the platform</p>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="filters-bar" style="margin-bottom:24px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span style="font-weight:600; font-size:14px;">Filter by Status:</span>
+        <a href="/admin/bookings" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-primary{% endif %}">All</a>
+        <a href="/admin/bookings?status=pending" class="btn btn-sm {% if status_filter=='pending' %}btn-dark{% else %}btn-outline-primary{% endif %}">Pending</a>
+        <a href="/admin/bookings?status=confirmed" class="btn btn-sm {% if status_filter=='confirmed' %}btn-dark{% else %}btn-outline-primary{% endif %}">Confirmed</a>
+        <a href="/admin/bookings?status=completed" class="btn btn-sm {% if status_filter=='completed' %}btn-dark{% else %}btn-outline-primary{% endif %}">Completed</a>
+        <a href="/admin/bookings?status=cancelled" class="btn btn-sm {% if status_filter=='cancelled' %}btn-dark{% else %}btn-outline-primary{% endif %}">Cancelled</a>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-calendar-alt" style="color:#2563eb;margin-right:8px;"></i>
+          Bookings ({{ bookings|length }})
+        </h3>
+      </div>
+
+      {% if bookings %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in bookings %}
+              <tr>
+                <td>{{ b.id }}</td>
+                <td><strong>{{ b.user_name }}</strong></td>
+                <td style="font-size:12px; color:var(--text-muted);">{{ b.user_email or '—' }}</td>
+                <td>{{ b.service_name }}</td>
+                <td><span class="badge badge-info">{{ b.service_type or '—' }}</span></td>
+                <td>{{ b.location or '—' }}</td>
+                <td style="font-size:12px; color:var(--text-muted);">
+                  {{ b.booking_date.strftime('%b %d, %Y') if b.booking_date else '—' }}
+                </td>
+                <td>
+                  {% if b.status == 'completed' %}
+                    <span class="badge badge-success">Completed</span>
+                  {% elif b.status == 'confirmed' %}
+                    <span class="badge badge-info">Confirmed</span>
+                  {% elif b.status == 'cancelled' %}
+                    <span class="badge badge-danger">Cancelled</span>
+                  {% else %}
+                    <span class="badge badge-warning">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                    {% if b.status != 'confirmed' %}
+                      <a href="/admin/update_booking_status/{{ b.id }}/confirmed"
+                         class="btn btn-sm" style="background:#d0ebff; color:#0050b3; font-size:11px;">
+                        Confirm
+                      </a>
+                    {% endif %}
+                    {% if b.status != 'completed' %}
+                      <a href="/admin/update_booking_status/{{ b.id }}/completed"
+                         class="btn btn-sm" style="background:#d4f5e7; color:#0d7a3e; font-size:11px;">
+                        Complete
+                      </a>
+                    {% endif %}
+                    {% if b.status != 'cancelled' %}
+                      <a href="/admin/update_booking_status/{{ b.id }}/cancelled"
+                         class="btn btn-sm" style="background:#f8d7da; color:#842029; font-size:11px;"
+                         onclick="return confirm('Cancel this booking?')">
+                        Cancel
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📅</div>
+          <h3>No bookings found</h3>
+          <p>No bookings match the selected filter.</p>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

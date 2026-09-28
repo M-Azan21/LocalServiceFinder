@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}Local Service Finder — Trusted Local Services{% endblock %}
+
+{% block content %}
+
+<!-- ─── Hero ─────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-grid">
+    <!-- Left -->
+    <div class="hero-content" style="animation: floatUp .6s ease both;">
+      <div class="hero-badge">
+        <i class="fas fa-shield-check"></i> Trust Score Verified Providers
+      </div>
+      <h1>
+        Find <span class="highlight">Trusted</span> Local Services Near You
+      </h1>
+      <p>
+        Connect with verified electricians, plumbers, cleaners, tutors & more.
+        Every provider is rated and reviewed by real customers.
+      </p>
+
+      <form class="hero-search" action="/services" method="GET">
+        <input type="text" name="search" placeholder="What service do you need?" autocomplete="off">
+        <button type="submit"><i class="fas fa-search"></i> Search</button>
+      </form>
+
+      <div class="hero-tags">
+        <span>Popular:</span>
+        {% for cat in categories %}
+          <a href="/services?category={{ cat }}">{{ cat }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Visual -->
+    <div class="hero-visual">
+      <div class="hero-stat-card" style="animation-delay:.1s">
+        <div class="hero-stat-icon" style="background:rgba(29,191,115,.2);">🔧</div>
+        <div>
+          <div class="value">{{ total_services }}+</div>
+          <div class="label">Active Services</div>
+        </div>
+      </div>
+      <div class="hero-stat-card" style="animation-delay:.2s">
+        <div class="hero-stat-icon" style="background:rgba(255,159,67,.2);">⭐</div>
+        <div>
+          <div class="value">4.8/5</div>
+          <div class="label">Average Trust Score</div>
+        </div>
+      </div>
+      <div class="hero-stat-card" style="animation-delay:.3s">
+        <div class="hero-stat-icon" style="background:rgba(10,189,227,.2);">👥</div>
+        <div>
+          <div class="value">{{ total_users }}+</div>
+          <div class="label">Registered Users</div>
+        </div>
+      </div>
+      <div class="hero-stat-card" style="animation-delay:.4s">
+        <div class="hero-stat-icon" style="background:rgba(126,84,210,.2);">✅</div>
+        <div>
+          <div class="value">{{ total_bookings }}+</div>
+          <div class="label">Jobs Completed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Stats Bar ─────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-item">
+      <div class="num">{{ total_services }}+</div>
+      <div class="lbl">Services Listed</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">{{ total_users }}+</div>
+      <div class="lbl">Happy Users</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">{{ total_bookings }}+</div>
+      <div class="lbl">Bookings Made</div>
+    </div>
+    <div class="stat-item">
+      <div class="num">{{ categories|length }}+</div>
+      <div class="lbl">Categories</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Browse by Category ─────────────────────────────── -->
+<section class="section" style="background: white;">
+  <div class="container-main">
+    <div class="section-header">
+      <div class="tag">Categories</div>
+      <h2>What Service Do You Need?</h2>
+      <p>Browse from our wide range of local service categories</p>
+    </div>
+
+    <div class="category-pills">
+      {% set icons = {
+        'Electrician':  '⚡',
+        'Plumber':      '🔩',
+        'Cleaning':     '🧹',
+        'AC Technician':'❄️',
+        'Tutor':        '📚',
+        'Painter':      '🎨',
+        'Carpenter':    '🪵',
+        'Driver':       '🚗',
+        'Cook':         '🍳',
+        'Gardener':     '🌿'
+      } %}
+      {% for cat in categories %}
+        <a href="/services?category={{ cat }}" class="category-pill">
+          {{ icons.get(cat, '🔧') }} {{ cat }}
+        </a>
+      {% endfor %}
+      <a href="/services" class="category-pill">
+        🔍 View All
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Featured Services ──────────────────────────────── -->
+<section class="section">
+  <div class="container-main">
+    <div class="section-header">
+      <div class="tag">Top Rated</div>
+      <h2>Featured Services</h2>
+      <p>Handpicked providers with the highest trust scores</p>
+    </div>
+
+    {% if featured %}
+      <div class="services-grid">
+        {% for s in featured %}
+          {% set trust = ((s.rating or 0)|float / 5 * 100)|round %}
+          <div class="service-card">
+            <div class="card-img-wrap">
+              {% if s.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + s.image_filename) }}" alt="{{ s.name }}">
+              {% else %}
+                <div class="card-img-placeholder">
+                  {% set icons2 = {'Electrician':'⚡','Plumber':'🔩','Cleaning':'🧹','AC Technician':'❄️','Tutor':'📚'} %}
+                  {{ icons2.get(s.service_type, '🔧') }}
+                </div>
+              {% endif %}
+              <span class="card-badge">{{ s.service_type }}</span>
+            </div>
+
+            <div class="card-body">
+              <div class="card-title">{{ s.name }}</div>
+              <div class="card-location">
+                <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i>
+                {{ s.location }}
+              </div>
+              <div class="card-desc">{{ s.description or 'Professional service provider.' }}</div>
+
+              <div class="card-footer-inner">
+                <div class="rating-stars">
+                  <span class="stars">
+                    {% for i in range(1, 6) %}
+                      {% if i <= (s.rating or 0)|round %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                  </span>
+                  <span class="rating-num">{{ "%.1f"|format(s.rating or 0) }}</span>
+                  <span class="rating-count">({{ s.total_reviews }})</span>
+                </div>
+                {% if s.price_range %}
+                  <span class="price-range">{{ s.price_range }}</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a href="/service/{{ s.id }}" class="btn btn-outline-primary btn-sm" style="flex:1;justify-content:center;">
+                View Details
+              </a>
+              <a href="/hire/{{ s.id }}" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">
+                Hire Now
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div style="text-align:center; margin-top:40px;">
+        <a href="/services" class="btn btn-dark btn-lg">
+          <i class="fas fa-th-large"></i> Browse All Services
+        </a>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="icon">🔧</div>
+        <h3>No services yet</h3>
+        <p>Be the first to add a service!</p>
+        <a href="/add_service" class="btn btn-primary btn-md" style="margin-top:16px;">Add Your Service</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ─── How it Works ──────────────────────────────────── -->
+<section class="section" style="background: white;">
+  <div class="container-main">
+    <div class="section-header">
+      <div class="tag">How It Works</div>
+      <h2>Get Started in 3 Simple Steps</h2>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:30px; text-align:center;">
+      <div style="padding:30px 24px;">
+        <div style="width:64px;height:64px;background:var(--primary-light);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;">🔍</div>
+        <h3 style="font-size:1.1rem; margin-bottom:10px;">1. Search Services</h3>
+        <p style="color:var(--text-muted); font-size:14px;">Browse or search for services by category, location, or name.</p>
+      </div>
+      <div style="padding:30px 24px;">
+        <div style="width:64px;height:64px;background:#dbeafe;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;">⭐</div>
+        <h3 style="font-size:1.1rem; margin-bottom:10px;">2. Check Trust Score</h3>
+        <p style="color:var(--text-muted); font-size:14px;">Every provider has a real trust score based on ratings and reviews.</p>
+      </div>
+      <div style="padding:30px 24px;">
+        <div style="width:64px;height:64px;background:#ede9fe;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;">✅</div>
+        <h3 style="font-size:1.1rem; margin-bottom:10px;">3. Hire & Rate</h3>
+        <p style="color:var(--text-muted); font-size:14px;">Book the provider directly and leave a review after the job.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ───────────────────────────────────────────── -->
+{% if not session.get('user') %}
+<section style="background: linear-gradient(135deg, var(--dark-2), var(--dark-3)); padding: 70px 24px; text-align:center;">
+  <h2 style="color:white; font-size:2rem; margin-bottom:12px;">Ready to Get Started?</h2>
+  <p style="color:rgba(255,255,255,.6); margin-bottom:32px; font-size:1rem;">Join thousands of users finding trusted local services every day.</p>
+  <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <a href="/register" class="btn btn-primary btn-xl">Create Free Account</a>
+    <a href="/services" class="btn btn-lg" style="background:rgba(255,255,255,.1); color:white; border:1.5px solid rgba(255,255,255,.2);">Browse Services</a>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

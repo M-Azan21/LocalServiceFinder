@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Add Service — LocalFind{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 68px); background: linear-gradient(135deg, var(--dark-2), var(--dark-3)); padding:60px 24px; display:flex; align-items:flex-start; justify-content:center;">
+  <div class="form-card wide">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="width:56px;height:56px;background:var(--primary);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px;">🔧</div>
+      <h2 style="font-size:1.6rem;">Add Your Service</h2>
+      <p style="color:var(--text-muted);">Fill in the details and start receiving bookings</p>
+    </div>
+
+    <form method="POST" action="/add_service" enctype="multipart/form-data">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Service Name *</label>
+          <input type="text" name="name" class="form-control" placeholder="e.g. Ali Electric Works" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select name="service_type" class="form-control" required>
+            <option value="">Select Category</option>
+            <option value="Electrician">⚡ Electrician</option>
+            <option value="Plumber">🔩 Plumber</option>
+            <option value="Cleaning">🧹 Cleaning</option>
+            <option value="AC Technician">❄️ AC Technician</option>
+            <option value="Tutor">📚 Tutor</option>
+            <option value="Painter">🎨 Painter</option>
+            <option value="Carpenter">🪵 Carpenter</option>
+            <option value="Driver">🚗 Driver</option>
+            <option value="Cook">🍳 Cook</option>
+            <option value="Gardener">🌿 Gardener</option>
+            <option value="Other">🔧 Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Location / City *</label>
+          <input type="text" name="location" class="form-control" placeholder="e.g. Rawalpindi, Islamabad" required>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="4"
+            placeholder="Describe your services, experience, and what makes you stand out…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Price Range</label>
+          <input type="text" name="price_range" class="form-control" placeholder="e.g. Rs 500–2000">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Image (optional)</label>
+          <input type="file" name="image" class="form-control" accept="image/*">
+          <span style="font-size:11px; color:var(--text-muted); margin-top:4px; display:block;">
+            JPG, PNG, WebP — max 5 MB
+          </span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-full" style="margin-top:12px;">
+        <i class="fas fa-plus-circle"></i> Publish Service
+      </button>
+    </form>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a href="/dashboard" style="color:var(--text-muted); font-size:14px;">
+        ← Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

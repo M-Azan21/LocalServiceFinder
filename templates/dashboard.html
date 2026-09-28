@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Local Service Finder{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="dashboard-header-inner">
+      <div class="dashboard-greeting">
+        <h1>👋 Hello, {{ session.user }}!</h1>
+        <p>Manage your services and bookings from your personal dashboard</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="/add_service" class="btn btn-primary btn-md">
+          <i class="fas fa-plus"></i> Add Service
+        </a>
+        <a href="/services" class="btn btn-md" style="background:rgba(255,255,255,.12); color:white;">
+          <i class="fas fa-search"></i> Browse
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+
+    <!-- Stats -->
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-card-icon green"><i class="fas fa-tools"></i></div>
+        <div>
+          <div class="number">{{ service_count }}</div>
+          <div class="label">My Services</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon blue"><i class="fas fa-calendar-check"></i></div>
+        <div>
+          <div class="number">{{ booking_count }}</div>
+          <div class="label">My Bookings</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon orange"><i class="fas fa-star"></i></div>
+        <div>
+          <div class="number">
+            {% if my_services %}
+              {% set total_rating = namespace(val=0) %}
+              {% for s in my_services %}
+                {% set total_rating.val = total_rating.val + (s.rating or 0)|float %}
+              {% endfor %}
+              {{ "%.1f"|format(total_rating.val / my_services|length) }}
+            {% else %}—{% endif %}
+          </div>
+          <div class="label">Avg Rating</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon purple"><i class="fas fa-user-circle"></i></div>
+        <div>
+          <div class="email-text">{{ session.email }}</div>
+          <div class="label">Account Email</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Services -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-tools" style="color:var(--primary);margin-right:8px;"></i> My Services</h3>
+        <a href="/add_service" class="btn btn-primary btn-sm">+ Add New</a>
+      </div>
+
+      {% if my_services %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Service Name</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Rating</th>
+                <th>Reviews</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in my_services %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td><strong>{{ s.name }}</strong></td>
+                <td>
+                  <span class="badge badge-info">{{ s.service_type }}</span>
+                </td>
+                <td><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> {{ s.location }}</td>
+                <td>
+                  <span style="color:#ffc107;">★</span>
+                  <strong>{{ "%.1f"|format(s.rating or 0) }}</strong>
+                </td>
+                <td>{{ s.total_reviews }}</td>
+                <td>{{ s.price_range or '—' }}</td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <a href="/service/{{ s.id }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="/delete_my_service/{{ s.id }}"
+                       class="btn btn-sm btn-danger-soft"
+                       onclick="return confirm('Delete this service?')">
+                       <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">🔧</div>
+          <h3>No services yet</h3>
+          <p>Add your first service to start receiving bookings.</p>
+          <a href="/add_service" class="btn btn-primary btn-md" style="margin-top:16px;">Add Your First Service</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- My Bookings -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-calendar-check" style="color:#2563eb;margin-right:8px;"></i> My Recent Bookings</h3>
+        <a href="/services" class="btn btn-outline-primary btn-sm">Book More</a>
+      </div>
+
+      {% if my_bookings %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Service</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in my_bookings %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td><strong>{{ b.service_name }}</strong></td>
+                <td>{{ b.service_type or '—' }}</td>
+                <td>{{ b.location or '—' }}</td>
+                <td style="font-size:12px; color:var(--text-muted);">
+                  {{ b.booking_date.strftime('%b %d, %Y') if b.booking_date else '—' }}
+                </td>
+                <td>
+                  {% if b.status == 'completed' %}
+                    <span class="badge badge-success">Completed</span>
+                  {% elif b.status == 'confirmed' %}
+                    <span class="badge badge-info">Confirmed</span>
+                  {% elif b.status == 'cancelled' %}
+                    <span class="badge badge-danger">Cancelled</span>
+                  {% else %}
+                    <span class="badge badge-warning">Pending</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📅</div>
+          <h3>No bookings yet</h3>
+          <p>Browse services and hire a provider.</p>
+          <a href="/services" class="btn btn-primary btn-md" style="margin-top:16px;">Browse Services</a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

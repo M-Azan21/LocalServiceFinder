@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login — LocalFind{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="background: linear-gradient(135deg, #0d0d0d, #1a1a2e);">
+  <div class="form-card">
+    <div class="auth-logo">
+      <div class="logo-mark" style="background:#e11d48;">🛡️</div>
+      <h2>Admin Panel</h2>
+      <p style="color:var(--text-muted);">Restricted access — authorized personnel only</p>
+    </div>
+
+    <form method="POST" action="/admin">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-user-shield"></i></span>
+          <input type="text" name="username" class="form-control" style="padding-left:40px;" placeholder="Admin username" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);"><i class="fas fa-lock"></i></span>
+          <input type="password" name="password" class="form-control" style="padding-left:40px;" placeholder="Admin password" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-md btn-full" style="background:#e11d48; color:white; margin-top:8px;">
+        <i class="fas fa-sign-in-alt"></i> Admin Login
+      </button>
+    </form>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a href="/" style="font-size:13px; color:var(--text-muted);">← Back to Website</a>
+    </div>
+
+    <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:12px;">
+      Default: <code>admin</code> / <code>admin123</code>
+    </div>
+  </div>
+</div>
+{% endblock %}

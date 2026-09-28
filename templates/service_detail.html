@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block title %}{{ service.name }} — Local Service Finder{% endblock %}
+
+{% block content %}
+
+<!-- Detail Hero -->
+<div class="detail-hero">
+  <div class="detail-inner">
+    <div>
+      <span class="detail-type-pill">{{ service.service_type }}</span>
+      <h1 style="font-size:2rem; margin-bottom:10px; color:white;">{{ service.name }}</h1>
+
+      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; color:rgba(255,255,255,.7); font-size:14px;">
+        <span><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> {{ service.location }}</span>
+        <span>
+          <span style="color:#ffc107;">★</span>
+          <strong style="color:white;">{{ "%.1f"|format(service.rating or 0) }}</strong>
+          <span>({{ service.total_reviews }} reviews)</span>
+        </span>
+        {% if service.price_range %}
+          <span><i class="fas fa-tag" style="color:var(--primary);"></i> {{ service.price_range }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Trust Score display -->
+    <div style="text-align:center; background:rgba(255,255,255,.08); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.15); border-radius:var(--radius); padding:24px 32px;">
+      <div style="font-size:2.8rem; font-weight:800; font-family:'Sora',sans-serif;
+        color: {% if trust_score >= 80 %}#1dbf73{% elif trust_score >= 60 %}#ff9f43{% else %}#ee5a24{% endif %};">
+        {{ trust_score }}%
+      </div>
+      <div style="color:rgba(255,255,255,.6); font-size:12px; text-transform:uppercase; letter-spacing:.08em; margin-top:4px;">
+        Trust Score
+      </div>
+      <div style="margin-top:10px;">
+        {% if trust_score >= 80 %}
+          <span class="trust-badge excellent"><i class="fas fa-shield-check"></i> Highly Trusted</span>
+        {% elif trust_score >= 60 %}
+          <span class="trust-badge good"><i class="fas fa-shield"></i> Good Provider</span>
+        {% else %}
+          <span class="trust-badge fair"><i class="fas fa-shield-alt"></i> New Provider</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:40px 24px; max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 380px; gap:32px; align-items:start;">
+
+  <!-- Left Column -->
+  <div>
+    <!-- About -->
+    <div style="background:white; border-radius:var(--radius); border:1px solid var(--border); padding:28px; margin-bottom:24px; box-shadow:var(--shadow-sm);">
+      <h3 style="font-size:1.1rem; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-info-circle" style="color:var(--primary);"></i> About This Service
+      </h3>
+      <p style="color:var(--text-muted); line-height:1.7;">
+        {{ service.description or 'Professional service provider ready to help you with all your needs. Contact for more details.' }}
+      </p>
+    </div>
+
+    <!-- Trust Score Breakdown -->
+    <div style="background:white; border-radius:var(--radius); border:1px solid var(--border); padding:28px; margin-bottom:24px; box-shadow:var(--shadow-sm);">
+      <h3 style="font-size:1.1rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-chart-bar" style="color:var(--primary);"></i> Trust Score Breakdown
+      </h3>
+
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <!-- Rating -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:6px;">
+            <span>Customer Rating</span>
+            <span style="color:var(--primary);">{{ "%.1f"|format(service.rating or 0) }}/5.0</span>
+          </div>
+          <div style="background:#f0f0f0; border-radius:999px; height:8px; overflow:hidden;">
+            <div style="background:var(--primary); height:100%; width:{{ ((service.rating or 0)|float / 5 * 100)|round }}%; border-radius:999px; transition:width .6s ease;"></div>
+          </div>
+        </div>
+
+        <!-- Reviews Volume -->
+        {% set rev_pct = [service.total_reviews * 5, 100]|min %}
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:6px;">
+            <span>Review Volume</span>
+            <span style="color:#2563eb;">{{ service.total_reviews }} reviews</span>
+          </div>
+          <div style="background:#f0f0f0; border-radius:999px; height:8px; overflow:hidden;">
+            <div style="background:#2563eb; height:100%; width:{{ rev_pct }}%; border-radius:999px;"></div>
+          </div>
+        </div>
+
+        <!-- Trust Overall -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:6px;">
+            <span>Overall Trust Score</span>
+            <span style="color:{% if trust_score >= 80 %}#1dbf73{% elif trust_score >= 60 %}#d97706{% else %}#dc2626{% endif %};">{{ trust_score }}%</span>
+          </div>
+          <div style="background:#f0f0f0; border-radius:999px; height:8px; overflow:hidden;">
+            <div style="background:{% if trust_score >= 80 %}var(--primary){% elif trust_score >= 60 %}#f59e0b{% else %}#ef4444{% endif %}; height:100%; width:{{ trust_score }}%; border-radius:999px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div style="background:white; border-radius:var(--radius); border:1px solid var(--border); padding:28px; box-shadow:var(--shadow-sm);">
+      <h3 style="font-size:1.1rem; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-comments" style="color:var(--primary);"></i>
+        Customer Reviews
+        <span style="background:var(--primary-light); color:var(--primary-dark); font-size:12px; padding:2px 8px; border-radius:999px;">{{ reviews|length }}</span>
+      </h3>
+
+      <!-- Leave a Review -->
+      <div style="background:var(--bg); border-radius:var(--radius-sm); padding:20px; margin-bottom:24px; border:1px solid var(--border);">
+        <h4 style="font-size:14px; font-weight:700; margin-bottom:14px; color:var(--text);">
+          ✍️ Leave a Review
+        </h4>
+        <form method="POST" action="/rate/{{ service.id }}">
+          {% if not session.get('user') %}
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" name="reviewer_name" class="form-control" placeholder="Your name" required>
+          </div>
+          {% else %}
+            <input type="hidden" name="reviewer_name" value="{{ session.user }}">
+          {% endif %}
+
+          <div class="form-group">
+            <label class="form-label">Rating</label>
+            <div class="star-rating-input">
+              {% for i in [5,4,3,2,1] %}
+                <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {% if i == 5 %}required{% endif %}>
+                <label for="star{{ i }}" title="{{ i }} star">★</label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comment</label>
+            <textarea name="comment" class="form-control" placeholder="Share your experience…" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-md">
+            <i class="fas fa-paper-plane"></i> Submit Review
+          </button>
+        </form>
+      </div>
+
+      <!-- Existing Reviews -->
+      {% if reviews %}
+        {% for r in reviews %}
+        <div class="review-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <div class="reviewer">
+              <i class="fas fa-user-circle" style="color:var(--primary);"></i>
+              {{ r.reviewer_name }}
+            </div>
+            <div>
+              <span style="color:#ffc107;">
+                {% for i in range(1, 6) %}{% if i <= r.rating %}★{% else %}☆{% endif %}{% endfor %}
+              </span>
+            </div>
+          </div>
+          <div class="review-date">{{ r.created_at.strftime('%B %d, %Y') if r.created_at else '' }}</div>
+          {% if r.comment %}
+            <div class="review-text">{{ r.comment }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="text-align:center; padding:30px; color:var(--text-muted);">
+          <div style="font-size:2rem; margin-bottom:10px;">💬</div>
+          <p>No reviews yet. Be the first!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right: Hire Sidebar -->
+  <div>
+    <div class="service-info-card">
+      <h3 style="font-size:1.1rem; margin-bottom:16px;">📋 Service Details</h3>
+
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:var(--text-muted);">Category</span>
+          <strong>{{ service.service_type }}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:var(--text-muted);">Location</span>
+          <strong>{{ service.location }}</strong>
+        </div>
+        {% if service.price_range %}
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:var(--text-muted);">Price Range</span>
+          <strong style="color:var(--primary);">{{ service.price_range }}</strong>
+        </div>
+        {% endif %}
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:var(--text-muted);">Rating</span>
+          <strong>
+            <span style="color:#ffc107;">★</span>
+            {{ "%.1f"|format(service.rating or 0) }} ({{ service.total_reviews }})
+          </strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px;">
+          <span style="color:var(--text-muted);">Trust Score</span>
+          <strong style="color:{% if trust_score >= 80 %}var(--primary){% elif trust_score >= 60 %}#d97706{% else %}#dc2626{% endif %};">
+            {{ trust_score }}%
+          </strong>
+        </div>
+      </div>
+
+      <a href="/hire/{{ service.id }}" class="btn btn-primary btn-md btn-full" style="margin-bottom:10px;">
+        <i class="fas fa-handshake"></i> Hire This Provider
+      </a>
+
+      <a href="/services" class="btn btn-md btn-full" style="background:#f1f3f5; color:var(--text); justify-content:center;">
+        <i class="fas fa-arrow-left"></i> Back to Services
+      </a>
+
+      <div style="text-align:center; margin-top:16px; font-size:12px; color:var(--text-muted);">
+        <i class="fas fa-shield-alt" style="color:var(--primary);"></i>
+        Trust Score Verified Provider
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

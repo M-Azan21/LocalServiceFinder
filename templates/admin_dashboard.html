@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — LocalFind{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <span>🛡️ LocalFind Admin</span>
+      <span class="role">Control Panel</span>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li><a href="/admin/dashboard" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+      <li><a href="/admin/bookings"><i class="fas fa-calendar-alt"></i> Bookings</a></li>
+      <li><a href="/admin/users"><i class="fas fa-users"></i> Users</a></li>
+      <li><a href="/services"><i class="fas fa-tools"></i> View Services</a></li>
+      <li style="margin-top:auto;">
+        <a href="/admin/logout" style="color:#f87171;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-page-header">
+      <h1>Dashboard Overview</h1>
+      <p>Monitor platform activity and manage services</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-card-icon green"><i class="fas fa-tools"></i></div>
+        <div>
+          <div class="number">{{ total_services }}</div>
+          <div class="label">Total Services</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon blue"><i class="fas fa-users"></i></div>
+        <div>
+          <div class="number">{{ total_users }}</div>
+          <div class="label">Registered Users</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon orange"><i class="fas fa-calendar-check"></i></div>
+        <div>
+          <div class="number">{{ total_bookings }}</div>
+          <div class="label">Total Bookings</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon purple"><i class="fas fa-star"></i></div>
+        <div>
+          <div class="number">{{ total_reviews }}</div>
+          <div class="label">Reviews</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Services Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-list" style="color:var(--primary);margin-right:8px;"></i> All Services</h3>
+        <a href="/services" class="btn btn-outline-primary btn-sm" target="_blank">View Public</a>
+      </div>
+
+      {% if services %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Service</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Owner</th>
+                <th>Rating</th>
+                <th>Reviews</th>
+                <th>Trust</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in services %}
+              {% set trust = ((s.rating or 0)|float / 5 * 100)|round %}
+              <tr>
+                <td>{{ s.id }}</td>
+                <td><strong>{{ s.name }}</strong></td>
+                <td><span class="badge badge-info">{{ s.service_type }}</span></td>
+                <td>{{ s.location }}</td>
+                <td>{{ s.owner or '—' }}</td>
+                <td>
+                  <span style="color:#ffc107;">★</span>
+                  <strong>{{ "%.1f"|format(s.rating or 0) }}</strong>
+                </td>
+                <td>{{ s.total_reviews }}</td>
+                <td>
+                  <span class="badge {% if trust >= 80 %}badge-success{% elif trust >= 60 %}badge-warning{% else %}badge-dark{% endif %}">
+                    {{ trust }}%
+                  </span>
+                </td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <a href="/service/{{ s.id }}" class="btn btn-sm btn-outline-primary" target="_blank">View</a>
+                    <a href="/admin/delete/{{ s.id }}"
+                       class="btn btn-sm btn-danger-soft"
+                       onclick="return confirm('Delete {{ s.name }}?')">
+                       <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">🔧</div>
+          <h3>No services yet</h3>
+        </div>
+      {% endif %}
+    </div>
+
+  </main>
+</div>
+{% endblock %}

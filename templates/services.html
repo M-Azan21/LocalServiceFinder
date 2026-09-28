@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Browse Services — Local Service Finder{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div style="background: linear-gradient(135deg, var(--dark-2), var(--dark-3)); padding:40px 24px; color:white;">
+  <div class="container-main">
+    <h1 style="color:white; font-size:2rem; margin-bottom:6px;">Browse All Services</h1>
+    <p style="color:rgba(255,255,255,.6);">{{ services|length }} services found
+      {% if search %} for "<strong style="color:var(--primary);">{{ search }}</strong>"{% endif %}
+      {% if selected_category %} in <strong style="color:var(--primary);">{{ selected_category }}</strong>{% endif %}
+    </p>
+  </div>
+</div>
+
+<div style="padding: 32px 24px;">
+  <div class="container-main">
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <form class="filters-form" method="GET" action="/services">
+        <div class="search-input" style="flex:2; min-width:200px; position:relative;">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input type="text" name="search" class="form-control" style="padding-left:42px;"
+                 placeholder="Search services, locations…" value="{{ search }}">
+        </div>
+
+        <select name="category" class="form-control" style="min-width:160px; max-width:200px;">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="sort" class="form-control" style="min-width:140px; max-width:180px;">
+          <option value="rating"  {% if sort == 'rating'  %}selected{% endif %}>Top Rated</option>
+          <option value="reviews" {% if sort == 'reviews' %}selected{% endif %}>Most Reviews</option>
+          <option value="newest"  {% if sort == 'newest'  %}selected{% endif %}>Newest First</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-md">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+
+        {% if search or selected_category %}
+          <a href="/services" class="btn btn-md" style="background:#f1f3f5; color:var(--text);">
+            <i class="fas fa-times"></i> Clear
+          </a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Results -->
+    {% if services %}
+      <div class="services-grid">
+        {% set icons = {'Electrician':'⚡','Plumber':'🔩','Cleaning':'🧹','AC Technician':'❄️','Tutor':'📚','Painter':'🎨','Carpenter':'🪵','Driver':'🚗','Cook':'🍳','Gardener':'🌿'} %}
+
+        {% for s in services %}
+          {% set trust = ((s.rating or 0)|float / 5 * 100)|round %}
+          <div class="service-card">
+            <div class="card-img-wrap">
+              {% if s.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + s.image_filename) }}" alt="{{ s.name }}">
+              {% else %}
+                <div class="card-img-placeholder">{{ icons.get(s.service_type, '🔧') }}</div>
+              {% endif %}
+              <span class="card-badge">{{ s.service_type }}</span>
+            </div>
+
+            <div class="card-body">
+              <div class="card-title">{{ s.name }}</div>
+              <div class="card-location">
+                <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i>
+                {{ s.location }}
+              </div>
+              <div class="card-desc">{{ s.description or 'Professional service provider ready to help you.' }}</div>
+
+              <!-- Trust Score -->
+              <div style="margin-bottom:12px;">
+                <span class="trust-badge {% if trust >= 80 %}excellent{% elif trust >= 60 %}good{% else %}fair{% endif %}">
+                  <i class="fas fa-shield-alt"></i>
+                  Trust: {{ trust }}%
+                </span>
+              </div>
+
+              <div class="card-footer-inner">
+                <div class="rating-stars">
+                  <span class="stars">
+                    {% for i in range(1, 6) %}
+                      {% if i <= (s.rating or 0)|round %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                  </span>
+                  <span class="rating-num">{{ "%.1f"|format(s.rating or 0) }}</span>
+                  <span class="rating-count">({{ s.total_reviews }} reviews)</span>
+                </div>
+                {% if s.price_range %}
+                  <span class="price-range">{{ s.price_range }}</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <a href="/service/{{ s.id }}" class="btn btn-outline-primary btn-sm" style="flex:1; justify-content:center;">
+                <i class="fas fa-eye"></i> Details
+              </a>
+              <a href="/hire/{{ s.id }}" class="btn btn-primary btn-sm" style="flex:1; justify-content:center;">
+                <i class="fas fa-handshake"></i> Hire
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="empty-state" style="background:white; border-radius:var(--radius); border:1px solid var(--border); margin-top:20px;">
+        <div class="icon">🔍</div>
+        <h3>No services found</h3>
+        <p>Try different search terms or clear the filters.</p>
+        <a href="/services" class="btn btn-primary btn-md" style="margin-top:16px;">View All Services</a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
